@@ -29,7 +29,7 @@
                                    </tr>
                                </thead>
                                <tbody>
-                                   @foreach ($brands as $data)
+                                   {{-- @foreach ($brands as $data)
 
                                        <tr>
                                            <td>{{ $loop->iteration }}</td>
@@ -40,7 +40,7 @@
                                                <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
                                            </td>
                                        </tr>
-                                   @endforeach
+                                   @endforeach --}}
                                </tbody>
                                <tfoot>
                                    <tr>
@@ -52,7 +52,7 @@
                                </tfoot>
                            </table>
 
-                           {{ $brands->links() }}
+                           {{-- {{ $brands->links() }} --}}
                        </div>
                    </div>
                </div>
@@ -104,11 +104,11 @@
            </div>
            <div class="modal-footer">
                <button type="button" class="btn btn-secondary" data-dismiss="modal" wire:click.prevent="cancel">Cancel</button>
-               @if ($updateMode == true)
+               {{-- @if ($updateMode == true)
                    <button wire:click.prevent="update" class="btn btn-success">Update</button>
                @else
                    <button wire:click.prevent="submit" class="btn btn-primary">Save</button>
-               @endif
+               @endif --}}
 
            </div>
 

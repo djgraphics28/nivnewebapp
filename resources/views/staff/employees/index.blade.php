@@ -21,6 +21,21 @@
   </div>
   <!-- /.content-header -->
 
-@livewire('staff-customer')
+@livewire('staff-employee')
 
 @endsection
+
+@push('scripts')
+
+<script>
+    $(document).ready(function () {
+        $('#select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+        $('#select2bs4').on('change', function (e) {
+            var data = $('#select2bs4').select2("val");
+            @this.set('ottPlatform', data);
+        });
+    });
+</script>
+@endpush

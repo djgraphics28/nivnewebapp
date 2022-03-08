@@ -18,10 +18,12 @@ class Employee extends Model
         'contact_number',
         'address',
         'position',
+        'is_active',
+        'branch_id',
     ];
 
-    public function stockreturn()
-    {
-        return $this->belongsTo(Stockreturn::class);
-    }
+    // public function stockreturn()
+    // {
+    //     return $this->belongsTo(Stockreturn::class);
+    // }
 }

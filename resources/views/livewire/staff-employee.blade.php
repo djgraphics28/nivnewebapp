@@ -6,7 +6,7 @@
            <div class="col-lg-12">
                <div class="card card-primary card-outline">
                    <div class="card-header">
-                  <button wire:click.prevent="addNew()" class="btn btn-primary float-right"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add New Customer</button>
+                  <button wire:click.prevent="addNew()" class="btn btn-primary float-right"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add New Employee</button>
                    </div>
                    <div class="card-body">
                        @if (session()->has('message'))
@@ -18,55 +18,55 @@
                                <input wire:model.prevent="searchTerm" type="text" class="col-md-6 form-control float-right mb-1" placeholder="Search here">
                            </div>
                            <div class="table-responsive">
-                           <h6 class="card-title">Customer Datatables</h6>
-                           <table class="table table-bordered table-hover">
-                               <thead>
-                                   <tr>
-                                        <th>#</th>
-                                        <th>CustomerName</th>
-                                        <th>Email</th>
-                                        <th>Contact</th>
-                                        <th>Address</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                   </tr>
-                               </thead>
-                               <tbody>
-                                   @forelse ($customers as $data)
-                                       <tr>
-                                           <td>{{ $loop->iteration }}</td>
-                                           <td>{{ $data->customer_name }}</td>
-                                           <td>{{ $data->email }}</td>
-                                           <td>{{ $data->contact_number }}</td>
-                                           <td>{{ $data->address }}</td>
-                                           <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
-                                           <td>
-                                               <button class="btn btn-warning" wire:click.prevent="edit({{ $data->id }})"> Edit</button>
-                                               <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
-                                           </td>
-                                       </tr>
+                            <h6 class="card-title">Employee Datatables</h6>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Contact</th>
+                                            <th>Position</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($datas as $data)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $data->firstname }}</td>
+                                                <td>{{ $data->address }}</td>
+                                                <td>{{ $data->contact_number }}</td>
+                                                <td>{{ $data->position }}</td>
+                                                <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
+                                                <td>
+                                                    <button class="btn btn-warning" wire:click.prevent="edit({{ $data->id }})"> Edit</button>
+                                                    <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
+                                                </td>
+                                            </tr>
 
-                                   @empty
-                                       <tr>
-                                           <td class="center" colspan="7">No Record found</td>
-                                       </tr>
-                                   @endforelse
-                               </tbody>
-                               <tfoot>
-                                   <tr>
-                                       <th>#</th>
-                                       <th>CustomerName</th>
-                                       <th>Email</th>
-                                       <th>Contact</th>
-                                       <th>Address</th>
-                                       <th>Status</th>
-                                       <th>Action</th>
-                                   </tr>
-                               </tfoot>
-                           </table>
+                                        @empty
+                                            <tr>
+                                                <td class="center" colspan="7">No Record found</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Contact</th>
+                                            <th>Position</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
 
-                           {{ $customers->links() }}
-                       </div>
+                            {{ $datas->links() }}
+                        </div>
                    </div>
                </div>
            </div>
@@ -79,11 +79,11 @@
 
    <!-- Form Modal -->
    <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true" wire:ignore.self>
-       <div class="modal-dialog" role="document">
+       <div class="modal-dialog modal-lg" role="document">
        <form action="" wire:submit.prevent="submit">
        <div class="modal-content">
            <div class="modal-header">
-               <h5 class="modal-title" id="formModalLabel">Add New Customer</h5>
+               <h5 class="modal-title" id="formModalLabel">Add New Employee</h5>
                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                    <span aria-hidden="true">&times;</span>
                </button>
@@ -160,7 +160,7 @@
                     @enderror
                 </div>
 
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <label for="">Email Address</label>
                     <input type="text" wire:model.defer="email" class="form-control @error('email') is-invalid @enderror" placeholder="Enter Email Address">
                     @error('email')
@@ -168,7 +168,7 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                </div>
+                </div> --}}
 
 
 

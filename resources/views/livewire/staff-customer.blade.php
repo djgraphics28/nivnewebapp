@@ -18,58 +18,58 @@
                                <input wire:model.prevent="searchTerm" type="text" class="col-md-6 form-control float-right mb-1" placeholder="Search here">
                            </div>
                            <div class="table-responsive">
-                           <h6 class="card-title">Customer Datatables</h6>
-                           <table class="table table-bordered table-hover">
-                               <thead>
-                                   <tr>
-                                        <th>#</th>
-                                        <th>CustomerName</th>
-                                        <th>Address</th>
-                                        <th>Channel</th>
-                                        <th>Contact</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                   </tr>
-                               </thead>
-                               <tbody>
-                                   @forelse ($customers as $data)
-                                       <tr>
-                                           <td>{{ $loop->iteration }}</td>
-                                           <td>{{ $data->customer_name }}</td>
-                                           <td>{{ $data->address }}</td>
-                                           <td>{{ $data->channel }}</td>
-                                           <td>{{ $data->contact_number }}</td>
-                                           <td>{{ $data->email }}</td>
-                                           <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
-                                           <td>
-                                               <button class="btn btn-warning" wire:click.prevent="edit({{ $data->id }})"> Edit</button>
-                                               <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
-                                           </td>
-                                       </tr>
+                                <h6 class="card-title">Customer Datatables</h6>
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                    <th>#</th>
+                                                    <th>CustomerName</th>
+                                                    <th>Address</th>
+                                                    <th>Channel</th>
+                                                    <th>Contact</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($customers as $data)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $data->customer_name }}</td>
+                                                    <td>{{ $data->address }}</td>
+                                                    <td>{{ $data->channel }}</td>
+                                                    <td>{{ $data->contact_number }}</td>
+                                                    <td>{{ $data->email }}</td>
+                                                    <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
+                                                    <td>
+                                                        <button class="btn btn-warning" wire:click.prevent="edit({{ $data->id }})"> Edit</button>
+                                                        <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
+                                                    </td>
+                                                </tr>
 
-                                   @empty
-                                       <tr>
-                                           <td class="center" colspan="7">No Record found</td>
-                                       </tr>
-                                   @endforelse
-                               </tbody>
-                               <tfoot>
-                                   <tr>
-                                        <th>#</th>
-                                        <th>CustomerName</th>
-                                        <th>Address</th>
-                                        <th>Channel</th>
-                                        <th>Contact</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                   </tr>
-                               </tfoot>
-                           </table>
+                                            @empty
+                                                <tr>
+                                                    <td class="center" colspan="7">No Record found</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                    <th>#</th>
+                                                    <th>CustomerName</th>
+                                                    <th>Address</th>
+                                                    <th>Channel</th>
+                                                    <th>Contact</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
 
-                           {{ $customers->links() }}
-                       </div>
+                                {{ $customers->links() }}
+                            </div>
                    </div>
                </div>
            </div>

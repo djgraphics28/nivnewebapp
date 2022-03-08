@@ -78,6 +78,6 @@ class StaffController extends Controller
 
     public function getEmployeePage()
     {
-        return view('staff.stocks.stockreturn');
+        return view('staff.employees.index');
     }
 }

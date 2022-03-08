@@ -18,7 +18,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
   <link rel="stylesheet" href="{{ asset('admin/plugins/select2/css/select2.min.css') }}">
   <link rel="stylesheet" href="{{ asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
-
+  <link rel="stylesheet" href="{{ asset('admin/plugins/select2/css/select2.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
   @livewireStyles
 </head>
 <body class="hold-transition sidebar-mini">
@@ -244,6 +245,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 <script src="{{ asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
 
+<script src="{{ asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
 
 <script>
     $("input[is-active-switch]").each(function(){
@@ -257,6 +259,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     $('.select2bs4').select2({
     theme: 'bootstrap4'
     })
+
+
 </script>
 
 <script>
@@ -342,6 +346,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $('#formModal').modal('hide');
     })
 
+     //Stocks Product Out Modal
+    window.addEventListener('show-productout-modal', event => {
+        $('#formModal').modal('show');
+    })
+
+    window.addEventListener('hide-productout-modal', event => {
+        $('#formModal').modal('hide');
+    })
+
     window.addEventListener('show-staff-stock-modal', event => {
         $('#formModal').modal('show');
     })
@@ -366,6 +379,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $('#confirmationModal').modal('hide');
     })
 </script>
+@stack('scripts')
 
 @livewireScripts
 </body>
