@@ -66,6 +66,7 @@
                                     <thead>
                                         <tr>
                                                 <th>#</th>
+                                                <th>Image</th>
                                                 <th>SKU/Product #</th>
                                                 <th>ProductName</th>
                                                 <th>Description</th>
@@ -84,6 +85,7 @@
                                         @forelse ($products as $data)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
+                                                <td><img style="width: 50px;" src="{{ Storage::disk('photo')->url($data->image_url) }}" alt=""></td>
                                                 <td>{{ $data->sku }}</td>
                                                 <td>{{ $data->product_name }}</td>
                                                 <td>{{ $data->description }}</td>
@@ -92,7 +94,7 @@
                                                 <td>{{ $data->category->category_name }}</td>
                                                 {{-- <td>{{ $data->price->sum('price_per_case') }}</td>
                                                 <td>{{ $data->price->sum()'price_per_pcs' }}</td> --}}
-                                                <td>{{ $data->stock->sum('qty') }}</td>
+                                                <td>{{ $data->stock_sum_stocksqty }}</td>
                                                 <td>{{ $data->stockalert ? $data->stockalert : "" }}</td>
                                                 {{-- <td width="50px"><input wire:model="stockalert" type="text" class="form-control" value="{{ $data->stockalert }}"></td> --}}
                                                 {{-- <td width="50px"><input type="text" class="form-control"></td> --}}
@@ -112,6 +114,7 @@
                                     <tfoot>
                                         <tr>
                                                 <th>#</th>
+                                                <th>Image</th>
                                                 <th>SKU/Product #</th>
                                                 <th>ProductName</th>
                                                 <th>Description</th>
@@ -164,6 +167,15 @@
                         </span>
                     @enderror
                 </div> --}}
+                @if ($image_url)
+                    {{-- Photo Preview: --}}
+                    <img width="200px" src="{{ $image_url->temporaryUrl() }}">
+                @endif
+                <div class="form-group">
+                    <label for="">Image</label>
+                    <input type="file" wire:model.defer="image_url" class="form-control">
+
+                </div>
 
                 <div class="form-group">
                     <label for="">Product Name</label>

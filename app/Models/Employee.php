@@ -26,4 +26,14 @@ class Employee extends Model
     // {
     //     return $this->belongsTo(Stockreturn::class);
     // }
+
+    public function tracking()
+    {
+        return $this->belongsTo(Productout::class, 'employee_id', 'id');
+    }
+
+    public function receipt()
+    {
+        return $this->hasOne(Receipt::class, 'salesman', 'id');
+    }
 }

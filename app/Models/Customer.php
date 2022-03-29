@@ -24,4 +24,9 @@ class Customer extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function receipt()
+    {
+        return $this->hasOne(Receipt::class, 'customer_id', 'id');
+    }
 }

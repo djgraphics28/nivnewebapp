@@ -119,7 +119,7 @@
 
    <!-- Form Modal -->
    <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true" wire:ignore.self>
-       <div class="modal-dialog" role="document">
+       <div class="modal-dialog modal-dialog-scrollable" role="document">
        <form action="" wire:submit.prevent="submit">
         <div class="modal-content">
             <div class="modal-header">

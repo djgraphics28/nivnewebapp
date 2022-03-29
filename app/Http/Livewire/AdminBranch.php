@@ -38,6 +38,7 @@ class AdminBranch extends Component
     {
         $validateData = $this->validate();
 
+
         Branch::create($validateData);
 
         $this->dispatchBrowserEvent('hide-branch-modal');

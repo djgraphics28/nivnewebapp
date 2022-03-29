@@ -97,7 +97,7 @@
           <li class="nav-item">
             <a href="{{ route('staff.stocks.productout') }}" class="nav-link {{ request()->is('staff/stocks/productout') ? 'active' : '' }}">
               <i class="far fa-circle nav-icon"></i>
-              <p>Product Out</p>
+              <p>Truck Loading/Return</p>
             </a>
           </li>
           <li class="nav-item">
@@ -132,6 +132,12 @@
         <a href="{{ route('staff.employees') }}" class="nav-link {{ request()->is('staff/employees') ? 'active' : '' }}">
             <i class="nav-icon fas fa-users"></i>
           <p>Employees</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ route('staff.receipts') }}" class="nav-link {{ request()->is('staff/receipts') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-money-check"></i>
+          <p>Receipts</p>
         </a>
       </li>
       {{-- <li class="nav-item">

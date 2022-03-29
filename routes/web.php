@@ -1,7 +1,10 @@
 <?php
 
+// use App\Models\Receipt;
+use App\Models\Productout;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ReceiptController;
+// use PDF;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,6 +51,16 @@ Route::group(['prefix'=>'staff', 'middleware'=>['isStaff','auth']], function(){
     Route::get('/customers', [App\Http\Controllers\StaffController::class, 'getCustomerPage'])->name('staff.customers');
     Route::get('/employees', [App\Http\Controllers\StaffController::class, 'getEmployeePage'])->name('staff.employees');
     Route::get('/stock-return', [App\Http\Controllers\StaffController::class, 'getStockReturnPage'])->name('staff.stock.return');
+    Route::get('/receipts', [App\Http\Controllers\StaffController::class, 'getReceiptPage'])->name('staff.receipts');
+    Route::get('/receipts/items', [App\Http\Controllers\StaffController::class, 'getReceiptItemPage'])->name('staff.receipts.items');
+    // Route::get('/receipts/items{id}', function(){
+    //     return view('staff.receipts.items');
+    // });
+
+    //generate PDF
+    Route::get('/generate-delivery-receipt/{id}', [App\Http\Controllers\PdfController::class, 'generateDeliveryReceipt']);
+
+    // Route::post('/save-receipts-product', [ReceiptController::class, 'store'])->name('save.receipt.product');
 
 });
 

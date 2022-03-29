@@ -22,7 +22,7 @@ class StaffProduct extends Component
     public $product_name;
     public $sku;
     public $description;
-    // public $branch_id;
+    public $image_url;
     public $category_id;
     public $brand_id;
     public $is_active;
@@ -57,6 +57,13 @@ class StaffProduct extends Component
     // ];
     protected $paginationTheme = 'bootstrap';
 
+    public function updatedPhoto()
+    {
+        $this->validate([
+            'image_url' => 'image|max:2048',
+        ]);
+    }
+
     public function mount()
     {
         // $this->suppliers = Supplier::all();
@@ -85,8 +92,11 @@ class StaffProduct extends Component
             'category_id' => 'required',
             'brand_id' => 'required',
             'unit' => 'required',
+            'image_url' => 'image|max:2048',
         ]);
 
+        $image_url = $this->image_url->store('/', 'public');
+        // dd($image_url);
         $product = Product::create([
             'product_name' => $this->product_name,
             'sku' => $this->sku,
@@ -96,7 +106,7 @@ class StaffProduct extends Component
             'brand_id' => $this->brand_id,
             'unit' => $this->unit,
             'stockalert' => $this->stockalert,
-            'image_url' => 'public/photo',
+            'image_url' => $image_url,
         ]);
 
         // if($product){
@@ -227,7 +237,7 @@ class StaffProduct extends Component
         // $products = Product::query()->with('stocks','qty')->get();
         // dd($products)
 
-        $products = Product::with('stock'
+        $products = Product::withSum('stock','stocks.qty'
                 // ['stock' => function($query) {
                 //     // $query->where('classi', 1);
                 // }],

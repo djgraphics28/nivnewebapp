@@ -80,4 +80,14 @@ class StaffController extends Controller
     {
         return view('staff.employees.index');
     }
+
+    public function getReceiptPage()
+    {
+        return view('staff.receipts.index');
+    }
+
+    public function getReceiptItemPage()
+    {
+        return view('staff.receipts.items');
+    }
 }

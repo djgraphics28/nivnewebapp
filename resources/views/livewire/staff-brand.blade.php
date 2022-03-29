@@ -94,7 +94,7 @@
 
                <div class="form-group">
                    <label for="">Status</label>
-                   <select wire:model.defer="is_active" class="form-control @error('is_active') is-invalid @enderror">
+                   <select wire:model.defer="is_active" class="form-control select2 @error('is_active') is-invalid @enderror">
                        <option value="">Choose</option>
                        <option value="1">Active</option>
                        <option value="0">Inactive</option>

@@ -18,8 +18,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
   <link rel="stylesheet" href="{{ asset('admin/plugins/select2/css/select2.min.css') }}">
   <link rel="stylesheet" href="{{ asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('admin/plugins/select2/css/select2.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  @yield('css-top')
+
   @livewireStyles
 </head>
 <body class="hold-transition sidebar-mini">
@@ -245,8 +247,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 <script src="{{ asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
 
-<script src="{{ asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
-
 <script>
     $("input[is-active-switch]").each(function(){
       $(this).bootstrapSwitch('state', $(this).prop('checked'));
@@ -256,12 +256,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
     $('.select2').select2()
 
     //Initialize Select2 Elements
-    $('.select2bs4').select2({
-    theme: 'bootstrap4'
-    })
+    // $('.select2bs4').select2({
+    //     theme: 'bootstrap4'
+    // })
 
 
 </script>
+
+@yield('js-bot')
 
 <script>
 
@@ -328,6 +330,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $('#formModal').modal('hide');
     })
 
+    //Suppliers Modal
+    window.addEventListener('show-receipt-modal', event => {
+        $('#formModal').modal('show');
+    })
+
+    window.addEventListener('hide-receipt-modal', event => {
+        $('#formModal').modal('hide');
+    })
+
     //Products Modal
     window.addEventListener('show-product-modal', event => {
         $('#formProductModal').modal('show');
@@ -355,6 +366,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $('#formModal').modal('hide');
     })
 
+    //add product to tracking Product Out Modal
+    window.addEventListener('show-add-product-tracking-modal', event => {
+        $('#formAddProductToTrackingModal').modal('show');
+    })
+
+    window.addEventListener('hide-add-product-tracking-modal', event => {
+        $('#formAddProductToTrackingModal').modal('hide');
+    })
+
+     //add product add to tracking Modal
+     window.addEventListener('show-product-add-modal', event => {
+        $('#addProductModal').modal('show');
+    })
+
+    window.addEventListener('hide-product-add-modal', event => {
+        $('#addProductModal').modal('hide');
+    })
+
     window.addEventListener('show-staff-stock-modal', event => {
         $('#formModal').modal('show');
     })
@@ -378,6 +407,51 @@ scratch. This page gets rid of all links and provides the needed markup only.
     window.addEventListener('hide-confirmation-delete-modal', event => {
         $('#confirmationModal').modal('hide');
     })
+
+    window.addEventListener('show-confirmation-delete-modal-tracking', event => {
+        $('#confirmationModaltracking').modal('show');
+    })
+
+    window.addEventListener('hide-confirmation-delete-modal-tracking', event => {
+        $('#confirmationModaltracking').modal('hide');
+    })
+
+    window.addEventListener('refresh-list-of-items', event => {
+        $('#listOfItemsTable').load();
+    })
+
+    window.addEventListener('show-qty-modal', event => {
+        $('#qtyModal').modal('show');
+    })
+
+    window.addEventListener('hide-qty-modal', event => {
+        $('#qtyModal').modal('hide');
+    })
+
+    window.addEventListener('show-return-modal', event => {
+        $('#returnModal').modal('show');
+    })
+
+    window.addEventListener('hide-return-modal', event => {
+        $('#returnModal').modal('hide');
+    })
+
+    window.addEventListener('show-return-qty-modal', event => {
+        $('#returnQty').modal('show');
+    })
+
+    window.addEventListener('hide-return-qty-modal', event => {
+        $('#returnQty').modal('hide');
+    })
+
+    window.addEventListener('show-product_tracking-modal', event => {
+        $('#productTrackingModal').modal('show');
+    })
+
+    window.addEventListener('hide-product_tracking-modal', event => {
+        $('#productTrackingModal').modal('hide');
+    })
+
 </script>
 @stack('scripts')
 
