@@ -41,6 +41,7 @@
                                            <td>{{ $data->address }}</td>
                                            <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
                                            <td>
+                                               <button class="btn btn-success" wire:click.prevent="showProducts({{ $data->id }})"> Show Products</button>
                                                <button class="btn btn-warning" wire:click.prevent="edit({{ $data->id }})"> Edit</button>
                                                <button class="btn btn-danger" wire:click.prevent="confirmation({{ $data->id }})"> Delete</button>
                                            </td>

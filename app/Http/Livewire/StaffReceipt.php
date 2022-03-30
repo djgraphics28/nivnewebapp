@@ -120,7 +120,7 @@ class StaffReceipt extends Component
             'or_date' => $this->or_date,
             'customer_id' => $this->customer,
             'salesman' => $this->salesman,
-            'created_by' => Auth::user()->branch_id,
+            'created_by' => Auth::user()->name,
             'branch_id' => Auth::user()->branch_id,
             'is_active' => 1,
         ]);

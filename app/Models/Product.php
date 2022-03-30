@@ -22,6 +22,7 @@ class Product extends Model
         'brand_id',
         'image_url',
         'stockalert',
+        'stocks',
     ];
 
     // protected $appends = ['stock_num'];
@@ -71,6 +72,11 @@ class Product extends Model
         return $this->belongsTo(ReceiptProduct::class, 'product_id', 'id');
     }
 
+    public function supplier_products()
+    {
+        return $this->hasManyThrough(SupplierProduct::class, 'product_id', 'id');
+    }
+
     public function scopeSearch($query, $searchTerm)
     {
         $searchTerm = "%$searchTerm%";
@@ -84,6 +90,11 @@ class Product extends Model
 
     }
 
+    public function activePrice()
+    {
+       return  $this->hasOne(PriceTbl::class)->latest();
+    }
+
     // public function getImageUrlAttribute()
     // {
     //     if($this->image_url){
@@ -92,5 +103,10 @@ class Product extends Model
 
     //     return asset('noimage.png');
     // }
+
+    public function supppliers()
+    {
+        return $this->belongsToMany(Supplier::class, 'supplier_products', 'product_id', 'supplier_id');
+    }
 
 }

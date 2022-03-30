@@ -8,7 +8,9 @@ use App\Models\Branch;
 use App\Models\Product;
 use Livewire\Component;
 use App\Models\Category;
+use App\Models\PriceTbl;
 use App\Models\Supplier;
+use App\Models\ProductIn;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +21,11 @@ class StaffProduct extends Component
     use WithPagination;
     use WithFileUploads;
 
+    public $deleteConfirmed;
+
+    protected $listeners = ['remove'];
+
+    public $stocks;
     public $product_name;
     public $sku;
     public $description;
@@ -43,7 +50,19 @@ class StaffProduct extends Component
 
     // public $brands;
     public $suppliers;
+    public $brands;
+    public $categories;
+    public $branches;
     public $classification;
+    public $date_in;
+    public $supplier_id;
+    public $quantity;
+
+    public $price_per_case;
+    public $price_per_pcs;
+    public $price_active;
+    public $date_priced;
+    public $price_histories = [];
     // public $unit;
 
 
@@ -66,7 +85,10 @@ class StaffProduct extends Component
 
     public function mount()
     {
-        // $this->suppliers = Supplier::all();
+        $this->suppliers = Supplier::all();
+        $this->branches = Branch::all();
+        $this->brands = Brand::all();
+        $this->categories = Category::all();
     }
     public function addNew()
     {
@@ -77,14 +99,6 @@ class StaffProduct extends Component
 
     public function submit()
     {
-        // $validateData = $this->validate();
-
-        // // $validateData['image_url'] = 'public/photo';
-
-        // $validateData['branch_id'] = Auth::user()->branch_id;
-
-        // Product::create($validateData);
-
         $validateData = $this->validate([
             'product_name' => 'required',
             'sku' => 'required|unique:products',
@@ -105,17 +119,43 @@ class StaffProduct extends Component
             'category_id' => $this->category_id,
             'brand_id' => $this->brand_id,
             'unit' => $this->unit,
+            // 'stocks' => $this->stocks,
             'stockalert' => $this->stockalert,
             'image_url' => $image_url,
         ]);
 
-        // if($product){
+
+
+        if($product){
+            if($this->price_per_case <> "" || $this->price_per_pcs <> ""){
+                PriceTbl::create([
+                    'product_id' => $product->id,
+                    'price_per_case' => $this->price_per_case,
+                    'price_per_pcs' => $this->price_per_pcs,
+                    'date_priced' => now(),
+                    'is_active' => 1,
+                ]);
+            }
+
+            // if($this->stocks <> ""){
+            //     ProductIn::create([
+            //         'product_id' => $product->id,
+            //         'qty' => $this->stocks,
+            //         'price_per_pcs' => $this->price_per_pcs,
+            //         'date_priced' => now(),
+            //         'is_active' => 1,
+            //     ]);
+            // }
+            // dd($price);
+            // }
             $this->dispatchBrowserEvent('hide-product-modal');
 
-            session()->flash('message', 'New Product Data Successfully Added!');
-
-            return redirect()->back();
-        // }
+            $this->dispatchBrowserEvent('swal:modal', [
+                'type' => 'success',
+                'message' => 'New Product Data Successfully Added!',
+                'text' => 'You can add stocks to this product data.'
+            ]);
+        }
 
     }
 
@@ -148,7 +188,6 @@ class StaffProduct extends Component
         // dd($id);
         $this->dispatchBrowserEvent('show-product-modal');
         $product = Product::findOrFail($id);
-
         // dd($product);
         $this->product_id = $id;
         $this->product_name = $product->product_name;
@@ -156,10 +195,17 @@ class StaffProduct extends Component
         $this->description = $product->description;
         // $this->branch_id = $product->branch_id;
         $this->unit = $product->unit;
+        $this->stocks = $product->stocks;
+
         $this->category_id = $product->category_id;
         $this->brand_id = $product->brand_id;
         $this->stockalert = $product->stockalert;
         $this->updateMode = true;
+
+        $price = PriceTbl::where('product_id',$id)->latest()->first();
+        // dd($price->price_per_case);
+        $this->price_per_case = $price->price_per_case;
+        $this->price_per_pcs = $price->price_per_pcs;
     }
 
     public function update()
@@ -188,17 +234,51 @@ class StaffProduct extends Component
 
         $this->dispatchBrowserEvent('hide-product-modal');
 
-        session()->flash('message', 'Product Data Updated Successfully.');
+        $this->dispatchBrowserEvent('swal:modal', [
+            'type' => 'success',
+            'message' => 'Product Data Updated Successfully!',
+            'text' => 'You can add stocks to this product data.'
+        ]);
 
         $this->resetInputFields();
     }
 
-    public function confirmation($deleteid)
+    public function alertConfirm($id)
     {
-        $this->deleteproduct_id = $deleteid;
-        $this->dispatchBrowserEvent('show-confirmation-delete-modal');
+        $this->deleteConfirmed = $id;
+        $this->dispatchBrowserEvent('swal:confirm', [
+                'type' => 'warning',
+                'message' => 'Are you sure?',
+                'text' => 'If deleted, you will not be able to recover this imaginary file!'
+            ]);
+    }
+
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function remove()
+    {
+        /* Write Delete Logic */
+        $delete = Product::find($this->deleteConfirmed)->delete();
+        if($delete){
+            $this->dispatchBrowserEvent('swal:modal', [
+                'type' => 'success',
+                'message' => 'Product has been removed!',
+                'text' => 'It will not seen on list of products anymore.'
+            ]);
+        }
+        // $this->mount();
 
     }
+
+    // public function confirmation($deleteid)
+    // {
+    //     $this->deleteproduct_id = $deleteid;
+    //     $this->dispatchBrowserEvent('show-confirmation-delete-modal');
+
+    // }
 
     public function delete()
     {
@@ -230,23 +310,15 @@ class StaffProduct extends Component
     {
         $branch_id = Auth::user()->branch_id;
 
-        $branches = Branch::all();
-        $brands = Brand::all();
-        $categories = Category::all();
+
 
         // $products = Product::query()->with('stocks','qty')->get();
         // dd($products)
 
-        $products = Product::withSum('stock','stocks.qty'
-                // ['stock' => function($query) {
-                //     // $query->where('classi', 1);
-                // }],
-                // ['price' => function($query) {
-                //     // $query->where('classi', 1);
-                // }],
-                // 'qty',
-                // 'price_per_case',
-                // 'price_per_pcs'
+        $products = Product::with('activePrice'
+                // ['activePrice' => function($query) {
+                //     $query->where('is_active', TRUE);
+                // }]
             )
         ->where('branch_id','=', $branch_id)
                 ->when($this->sortByBrand, function($query){
@@ -263,11 +335,106 @@ class StaffProduct extends Component
 
         return view('livewire.staff-product',[
             'products' => $products,
-            'branches' => $branches,
-            'categories' => $categories,
-            'brands' => $brands,
+            // 'branches' => $branches,
+            // 'categories' => $categories,
+            // 'brands' => $brands,
         ]);
     }
 
+    //ADD STOCKS
 
+    public function addNewStock($id)
+    {
+        $this->dispatchBrowserEvent('show-add-new_stock-modal');
+        //set product_id
+        $this->product_id = $id;
+        //fill product name to modal
+        $data = Product::findOrFail($id);
+        $this->product_name = $data->product_name;
+
+    }
+
+    public function saveNewStock()
+    {
+        $validateData = $this->validate([
+            'quantity' => 'required',
+            'date_in' => 'required',
+            'supplier_id' => 'required',
+        ]);
+
+        $stock = ProductIn::create([
+            'product_id' => $this->product_id,
+            'date_in' => $this->date_in,
+            'branch_id' => Auth::user()->branch_id,
+            'supplier_id' => $this->supplier_id,
+            'qty' => $this->quantity,
+        ]);
+
+        if($stock){
+            $product = Product::findOrFail($this->product_id);
+            $product->stocks += $this->quantity;
+            $product->save();
+
+            $this->dispatchBrowserEvent('hide-add-new_stock-modal');
+
+            $this->dispatchBrowserEvent('swal:modal', [
+                'type' => 'success',
+                'message' => 'New Stock Data Successfully Added!',
+                'text' => 'You can add more stocks to this product data.'
+            ]);
+
+
+        }
+    }
+    //Set Pricing
+    public function setPrice($id)
+    {
+        $this->dispatchBrowserEvent('show-set-price-modal');
+
+        //set product_id
+        $this->product_id = $id;
+        //fill product name to modal
+        $data = Product::findOrFail($id);
+        $this->product_name = $data->product_name;
+
+        $this->clearPrice();
+
+        $this->price_histories = PriceTbl::where('product_id',$id)->latest()->get();
+    }
+
+    public function clearPrice()
+    {
+        $this->price_per_case = '';
+        $this->price_per_pcs = '';
+        $this->date_priced = '';
+    }
+
+    public function setPriceSubmit()
+    {
+        $validateData = $this->validate([
+            'price_per_case' => 'required',
+            'price_per_pcs' => 'required',
+            'date_priced' => 'required',
+        ]);
+
+        $price = PriceTbl::create([
+            'product_id' => $this->product_id,
+            'price_per_case' => $this->price_per_case,
+            'price_per_pcs' => $this->price_per_pcs,
+            'date_priced' => $this->date_priced,
+            'is_active' => TRUE,
+        ]);
+
+        if($price){
+            $this->dispatchBrowserEvent('hide-set-price-modal');
+
+            $this->dispatchBrowserEvent('swal:modal', [
+                'type' => 'success',
+                'message' => 'New Price Data is set Successfully!',
+                'text' => 'congrats!.'
+            ]);
+
+            $this->clearPrice();
+        }
+    }
 }

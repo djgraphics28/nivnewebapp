@@ -6,7 +6,8 @@
            <div class="col-lg-12">
                <div class="card card-primary card-outline">
                    <div class="card-header">
-                  <button wire:click.prevent="addNew()" class="btn btn-primary float-right"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add New Product</button>
+                  <button wire:click.prevent="addNew()" class="btn btn-primary float-left"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add New Product</button>
+                  <button wire:click.prevent="addNew()" class="btn btn-success float-right"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add Bulk Stocks</button>
                    </div>
                    <div class="card-body">
                        @if (session()->has('message'))
@@ -50,6 +51,8 @@
                                  <option value="5">5 per page</option>
                                  <option value="10">10 per page</option>
                                  <option value="15">15 per page</option>
+                                 <option value="50">50 per page</option>
+                                 <option value="100">100 per page</option>
                              </select>
                         </div>
                         <div class="col-md-4">
@@ -59,7 +62,6 @@
                     </div>
 
                     <hr>
-
                            <div class="table-responsive">
                                 <h6 class="card-title">Products Datatables</h6>
                                 <table class="table table-bordered table-hover">
@@ -73,17 +75,17 @@
                                                 <th>Unit</th>
                                                 <th>Brand</th>
                                                 <th>Category</th>
-                                                {{-- <th>Price/Case</th>
-                                                <th>Price/Pcs</th> --}}
+                                                <th>Price/Case</th>
+                                                <th>Price/Pcs</th>
                                                 <th>Available Stocks</th>
-                                                <th>Stock Alert</th>
+                                                <th>Low Level Alert</th>
                                                 {{-- <th>Branch</th> --}}
                                                 <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($products as $data)
-                                            <tr>
+                                            <tr class="{{ $data->stocks <= $data->stockalert ? 'table-danger' : ''}}">
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td><img style="width: 50px;" src="{{ Storage::disk('photo')->url($data->image_url) }}" alt=""></td>
                                                 <td>{{ $data->sku }}</td>
@@ -92,17 +94,19 @@
                                                 <td>{{ $data->unit }}</td>
                                                 <td>{{ $data->brand->brand_name }}</td>
                                                 <td>{{ $data->category->category_name }}</td>
-                                                {{-- <td>{{ $data->price->sum('price_per_case') }}</td>
-                                                <td>{{ $data->price->sum()'price_per_pcs' }}</td> --}}
-                                                <td>{{ $data->stock_sum_stocksqty }}</td>
+                                                <td>{{ $data->activePrice->price_per_case ?? NULL }}</td>
+                                                <td>{{ $data->activePrice->price_per_pcs ?? NULL }}</td>
+                                                <td>{{ $data->stocks }}</td>
                                                 <td>{{ $data->stockalert ? $data->stockalert : "" }}</td>
                                                 {{-- <td width="50px"><input wire:model="stockalert" type="text" class="form-control" value="{{ $data->stockalert }}"></td> --}}
                                                 {{-- <td width="50px"><input type="text" class="form-control"></td> --}}
                                                 {{-- <td>{{ $data->branch->branch_name }}</td> --}}
                                                 <td>
-                                                    <button class="btn btn-warning btn-sm" wire:click.prevent="edit({{ $data->id }})"> <i class="fas fa-edit"></i></button>
-                                                    <button class="btn btn-danger btn-sm" wire:click.prevent="confirmation({{ $data->id }})"> <i class="fas fa-trash"></i></button>
-                                                    <button class="btn btn-primary btn-sm" wire:click.prevent="showStocksHistory({{ $data->id }})"> <i class="fas fa-eye"></i></button>
+                                                    <button title="Add New Stock" class="btn btn-success btn-sm" wire:click.prevent="addNewStock({{ $data->id }})"> <i class="fas fa-plus"></i></button>
+                                                    <button title="Edit Product" class="btn btn-warning btn-sm" wire:click.prevent="edit({{ $data->id }})"> <i class="fas fa-edit"></i></button>
+                                                    <button title="View Stock History" class="btn btn-primary btn-sm" wire:click.prevent="showStocksHistory({{ $data->id }})"> <i class="fas fa-eye"></i></button>
+                                                    <button title="Set/Edit Pricing" class="btn btn-info btn-sm" wire:click.prevent="setPrice({{ $data->id }})"> <i class="fas fa-dollar-sign"></i></button>
+                                                    <button title="Delete Product" class="btn btn-danger btn-sm" wire:click.prevent="alertConfirm({{ $data->id }})"> <i class="fas fa-trash"></i></button>
                                                 </td>
                                             </tr>
                                         @empty
@@ -121,8 +125,10 @@
                                                 <th>Unit</th>
                                                 <th>Brand</th>
                                                 <th>Category</th>
+                                                <th>Price/Case</th>
+                                                <th>Price/Pcs</th>
                                                 <th>Available Stocks</th>
-                                                <th>Stock Alert</th>
+                                                <th>Low Level Alert</th>
                                                 {{-- <th>Branch</th> --}}
                                                 <th>Action</th>
                                         </tr>
@@ -216,6 +222,36 @@
                         <option value="BOX">BOX</option>
                     </select>
                     @error('unit')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="">Price/Case</label>
+                    <input type="number" class="form-control @error('price_per_case') is-invalid @enderror" wire:model.defer="price_per_case">
+                    @error('price_per_case')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="">Price/Piece</label>
+                    <input type="number" class="form-control @error('price_per_pcs') is-invalid @enderror" wire:model.defer="price_per_pcs">
+                    @error('price_per_pcs')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="">Number of Stocks</label>
+                    <input type="number" class="form-control @error('stocks') is-invalid @enderror" wire:model.defer="stocks">
+                    @error('stocks')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
@@ -354,5 +390,145 @@
     </div>
   </div>
    {{-- StockHistory Modal --}}
+
+   {{-- Add New Stock Modal --}}
+   <div class="modal fade" id="addNewStockmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" wire:ignore.self>
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add New Stock to {{ $product_name }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="">Supplier</label>
+                <select class="form-control @error('supplier_id') is-invalid @enderror" wire:model.defer="supplier_id">
+                    <option value="">-- Choose --</option>
+                    @foreach ($suppliers as $supplier)
+                        <option value="{{ $supplier->id }}">{{ $supplier->supplier_name }}</option>
+                    @endforeach
+                </select>
+
+                @error('supplier_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="">Quantity</label>
+                <input type="number" class="form-control @error('quantity') is-invalid @enderror" wire:model.defer="quantity">
+                @error('quantity')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="">Date</label>
+                <input type="date" class="form-control @error('date_in') is-invalid @enderror" wire:model.defer="date_in">
+                @error('date_in')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" wire:click.prevent="saveNewStock()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+   {{-- Add New Stock Modal --}}
+
+   {{-- Set Price Modal --}}
+   <div class="modal fade" id="setPriceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" wire:ignore.self>
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Set New Price to {{ $product_name }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label for="">Price/Case</label>
+                <input type="number" class="form-control @error('price_per_case') is-invalid @enderror" wire:model.defer="price_per_case">
+                @error('price_per_case')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="">Price/Piece</label>
+                <input type="number" class="form-control @error('price_per_pcs') is-invalid @enderror" wire:model.defer="price_per_pcs">
+                @error('price_per_pcs')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="">Date Priced</label>
+                <input type="date" class="form-control @error('date_priced') is-invalid @enderror" wire:model.defer="date_priced">
+                @error('date_priced')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <hr>
+
+            <h3>Price Histories</h3>
+            <table class="table table-condensed table-sm">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Price/Case</th>
+                        <th>Price/Piece</th>
+                        <th>Date Priced</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($price_histories as $data)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $data->price_per_case }}</td>
+                            <td>{{ $data->price_per_pcs }}</td>
+                            <td>{{ $data->date_priced }}</td>
+                            <td>{{ $data->is_active == TRUE ? "Active" : "Not Active"}}</td>
+                            <td>
+                                <button title="Edit Price" class="btn btn-warning btn-sm" wire:click.prevent="editPrice({{ $data->id }})"> <i class="fas fa-edit"></i></button>
+                                <button title="Delete Price" class="btn btn-danger btn-sm" wire:click.prevent="deletePrice({{ $data->id }})"> <i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    @empty
+
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" wire:click.prevent="setPriceSubmit()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+   {{-- Set Price Modal --}}
 
 </div>

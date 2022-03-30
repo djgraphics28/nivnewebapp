@@ -166,5 +166,13 @@ class StaffSupplier extends Component
         ]);
     }
 
+    //Supplier Products
+
+    public function showProducts($id)
+    {
+        // dd($id);
+        return redirect()->route('staff.suppliers.products',['supplier' => $id]);
+    }
+
 
 }

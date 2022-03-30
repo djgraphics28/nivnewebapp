@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class StaffController extends Controller
@@ -44,6 +45,17 @@ class StaffController extends Controller
     public function getSupplierPage()
     {
         return view('staff.suppliers.index');
+    }
+
+    public function getSupplierProductPage($id)
+    {
+
+        $data = Supplier::find($id);
+        $data['supplier'] = $data->supplier_name;
+
+        $data['supplier_id'] = $id;
+
+        return view('staff.suppliers.product', $data);
     }
 
     public function getProductPage()

@@ -4,6 +4,8 @@
 use App\Models\Productout;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Livewire\StaffSupplierProduct;
+
 // use PDF;
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +44,7 @@ Route::group(['prefix'=>'staff', 'middleware'=>['isStaff','auth']], function(){
     Route::get('/categories', [App\Http\Controllers\StaffController::class, 'getCategoryPage'])->name('staff.categories');
     Route::get('/brands', [App\Http\Controllers\StaffController::class, 'getBrandPage'])->name('staff.brands');
     Route::get('/suppliers', [App\Http\Controllers\StaffController::class, 'getSupplierPage'])->name('staff.suppliers');
+    Route::get('/suppliers/{supplier}', [App\Http\Controllers\StaffController::class, 'getSupplierProductPage'])->name('staff.suppliers.products');
     Route::get('/products', [App\Http\Controllers\StaffController::class, 'getProductPage'])->name('staff.products');
     // Stocks
     Route::get('/stocks/list', [App\Http\Controllers\StaffController::class, 'getStockPage'])->name('staff.stocks');
@@ -53,8 +56,9 @@ Route::group(['prefix'=>'staff', 'middleware'=>['isStaff','auth']], function(){
     Route::get('/stock-return', [App\Http\Controllers\StaffController::class, 'getStockReturnPage'])->name('staff.stock.return');
     Route::get('/receipts', [App\Http\Controllers\StaffController::class, 'getReceiptPage'])->name('staff.receipts');
     Route::get('/receipts/items', [App\Http\Controllers\StaffController::class, 'getReceiptItemPage'])->name('staff.receipts.items');
-    // Route::get('/receipts/items{id}', function(){
-    //     return view('staff.receipts.items');
+
+    // Route::get('/suppliers/product', function(){
+    //     return view('staff.suppliers.product');
     // });
 
     //generate PDF

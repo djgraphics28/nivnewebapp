@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\SupplierProduct;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Supplier extends Model
 {
@@ -18,5 +19,8 @@ class Supplier extends Model
         'is_active',
     ];
 
-
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'supplier_products', 'supplier_id', 'product_id');
+    }
 }
