@@ -73,7 +73,14 @@
           <p>Products</p>
         </a>
       </li>
-      <li class="nav-item {{ strpos(Request::url(), 'stocks') == true ? 'menu-open' : '' }}">
+
+      <li class="nav-item">
+        <a href="{{ route('staff.truckinventories') }}" class="nav-link {{ request()->is('staff/truckinventories') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-truck"></i>
+          <p>Truck Inventory</p>
+        </a>
+      </li>
+      {{-- <li class="nav-item {{ strpos(Request::url(), 'stocks') == true ? 'menu-open' : '' }}">
         <a href="#" class="nav-link {{ strpos(Request::url(), 'stocks') == true ? 'active' : '' }}">
           <i class="nav-icon fas fa-boxes"></i>
           <p>
@@ -107,7 +114,7 @@
             </a>
           </li>
         </ul>
-      </li>
+      </li> --}}
 
       <li class="nav-item {{ strpos(Request::url(), 'reports') == true ? 'menu-open' : '' }}">
         <a href="#" class="nav-link {{ strpos(Request::url(), 'reports') == true ? 'active' : '' }}">

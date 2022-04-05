@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Employee;
 use Livewire\WithPagination;
 use App\Models\ReceiptProduct;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
@@ -29,6 +30,7 @@ class StaffReceipt extends Component
     public $description;
     public $amount_word;
     public $amount;
+    public $unitprice;
     public $salesman;
     public $salesmans;
     public $customer;
@@ -38,6 +40,7 @@ class StaffReceipt extends Component
     public $products;
     public $receipts;
     public $receipt_id;
+    public $receipt_product_id;
     public $product_id, $quantity, $product_amount;
     // public $allReceiptItems = [];
 
@@ -46,6 +49,7 @@ class StaffReceipt extends Component
 
 
     public $searchTerm;
+    public $receiptItems = [];
     // public $qty;
 
     protected $paginationTheme = 'bootstrap';
@@ -79,7 +83,7 @@ class StaffReceipt extends Component
     public function mount()
     {
         $this->salesmans = Employee::where('branch_id','=',Auth::user()->branch_id)->get();
-        $this->customers = Customer::where('branch_id','=',Auth::user()->branch_id)->get();
+        $this->customers = Customer::where('branch_id','=',Auth::user()->branch_id)->orderBy('customer_name')->get();
         $this->products = Product::where('branch_id','=',Auth::user()->branch_id)->get();
 
         // $this->allReceiptItems[] = [ 'product_id' => '', 'quantity' => 1, 'amount' => 0 ];
@@ -106,7 +110,7 @@ class StaffReceipt extends Component
 
         $validateData = $this->validate([
             'or_number' => 'required|unique:receipts',
-            'amount' => 'required',
+            // 'amount' => 'required',
             'or_date' => 'required',
             'customer' => 'required',
             'salesman' => 'required',
@@ -114,7 +118,7 @@ class StaffReceipt extends Component
 
         $create = Receipt::create([
             'or_number' => $this->or_number,
-            'amount' => $this->amount,
+            'amount' => 0,
             'amount_word' => $this->amount_word,
             'description' => $this->description,
             'or_date' => $this->or_date,
@@ -134,8 +138,9 @@ class StaffReceipt extends Component
                 'quantity.0' => 'required',
                 'product_amount.*' => 'required',
             ]);
-
+            $amount = 0;
             foreach ($this->product_id as $key => $value) {
+                $amount = $amount + ($this->product_amount[$key] * $this->quantity[$key]);
                 ReceiptProduct::create([
                     'product_id' => $this->product_id[$key],
                     'qty' => $this->quantity[$key],
@@ -143,6 +148,11 @@ class StaffReceipt extends Component
                     'receipt_id' => $create->id
                 ]);
             }
+
+            $update_amount = Receipt::find($create->id);
+            $update_amount->update([
+                'amount' => $amount,
+            ]);
 
             $this->inputs = [0];
 
@@ -164,9 +174,9 @@ class StaffReceipt extends Component
 
     public function edit($id)
     {
-        $this->dispatchBrowserEvent('show-receipt-modal');
+        $this->dispatchBrowserEvent('show-edit-receipt-modal');
         $receipt = Receipt::findOrFail($id);
-        $this->category_id = $id;
+        $this->receipt_id = $id;
         $this->or_number = $receipt->or_number;
         $this->or_date = $receipt->or_date;
         $this->description = $receipt->description;
@@ -175,6 +185,8 @@ class StaffReceipt extends Component
         $this->customer = $receipt->customer_id;
         $this->salesman = $receipt->salesman;
         $this->updateMode = true;
+
+        $this->receiptItems = ReceiptProduct::where('receipt_id','=',$id)->get();
     }
 
     public function update()
@@ -200,10 +212,24 @@ class StaffReceipt extends Component
             // 'branch_id' => Auth::user()->branch_id,
             // 'is_active' => 1,
         ]);
+        if($this->product_id <> NULL){
+            foreach ($this->product_id as $key => $value) {
+                ReceiptProduct::create([
+                    'product_id' => $this->product_id[$key],
+                    'qty' => $this->quantity[$key],
+                    'amount' => $this->product_amount[$key],
+                    'receipt_id' => $this->receipt_id
+                ]);
+            }
+        }
+
+        $this->updateAmountReceipt();
+
+        $this->resetInputFieldsProducts();
 
         $this->updateMode = false;
 
-        $this->dispatchBrowserEvent('hide-receipt-modal');
+        $this->dispatchBrowserEvent('hide-edit-receipt-modal');
 
         $this->dispatchBrowserEvent('swal:modal', [
             'type' => 'success',
@@ -218,14 +244,11 @@ class StaffReceipt extends Component
     private function resetInputFields(){
         $this->or_number = '';
         $this->or_date = '';
-        $this->amount = '';
+        // $this->amount = '';
         $this->amount_word = '';
         $this->description = '';
         $this->customer = '';
         $this->salesman = '';
-        $this->product_id = '';
-        $this->quantity = '';
-        $this->amount = '';
     }
 
     public function cancel()
@@ -327,7 +350,92 @@ class StaffReceipt extends Component
         // return view('livewire.staff-receipt',compact('samples'));
         $searchTerm = '%'.$this->searchTerm.'%';
         return view('livewire.staff-receipt',[
-            'samples' => Receipt::with('items')->where('or_number','like', $searchTerm)->latest()->paginate(5)
+            'samples' => Receipt::where('or_number','like', $searchTerm)->latest()->paginate(5)
+        ]);
+    }
+
+    public function editReceiptProduct($id)
+    {
+        // $this->inputs = null;
+        $this->receipt_product_id = $id;
+        $this->dispatchBrowserEvent('show-edit-items-receipt-modal');
+
+        $receipt = ReceiptProduct::findOrFail($id);
+        $this->product_id = $receipt->product_id;
+        $this->unitprice = $receipt->amount;
+        $this->quantity = $receipt->qty;
+    }
+
+    public function updateItems()
+    {
+        $validateData = $this->validate([
+            'product_id' => 'required',
+            'quantity' => 'required',
+            'unitprice' => 'required',
+        ]);
+        $amount_changes = $this->unitprice * $this->quantity;
+        $receipt = ReceiptProduct::find($this->receipt_product_id);
+
+        // dd($receipt);
+        $old_amount = $receipt->amount;
+
+        $receipt->update([
+            'product_id' => $this->product_id,
+            'amount' => $this->unitprice,
+            'qty' => $this->quantity,
+        ]);
+
+        // foreach ($this->product_id as $key => $value) {
+        //     ReceiptProduct::create([
+        //         'product_id' => $this->product_id[$key],
+        //         'qty' => $this->quantity[$key],
+        //         'amount' => $this->product_amount[$key],
+        //         'receipt_id' => $this->receipt_id
+        //     ]);
+        // }
+
+        $this->updateAmountReceipt();
+
+
+        // $this->updateMode = false;
+
+        $this->dispatchBrowserEvent('hide-edit-items-receipt-modal');
+
+        $this->dispatchBrowserEvent('swal:modal', [
+            'type' => 'success',
+            'message' => 'Items Data Updated Successfully!',
+            'text' => 'You can add products to this receipt data.'
+        ]);
+        // session()->flash('message', 'Receipt Data Updated Successfully.');
+
+        $this->resetInputFieldsProducts();
+
+        $this->loadItems($this->receipt_id);
+    }
+
+    public function loadItems($id)
+    {
+        $this->receiptItems = ReceiptProduct::where('receipt_id','=',$id)->get();
+    }
+
+    public function resetInputFieldsProducts()
+    {
+        $this->product_id = '';
+        $this->quantity = '';
+        $this->product_amount = '';
+    }
+
+    public function updateAmountReceipt()
+    {
+
+        $amount = ReceiptProduct::where('receipt_id',$this->receipt_id )->sum(DB::raw('amount * qty'));
+
+
+        // dd($amount*$quantity);
+        $find = Receipt::find($this->receipt_id);
+
+        $find->update([
+            'amount' => $amount,
         ]);
     }
 }

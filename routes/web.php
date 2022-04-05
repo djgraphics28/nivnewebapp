@@ -57,6 +57,7 @@ Route::group(['prefix'=>'staff', 'middleware'=>['isStaff','auth']], function(){
     Route::get('/receipts', [App\Http\Controllers\StaffController::class, 'getReceiptPage'])->name('staff.receipts');
     Route::get('/receipts/items', [App\Http\Controllers\StaffController::class, 'getReceiptItemPage'])->name('staff.receipts.items');
 
+    Route::get('/truckinventories', [App\Http\Controllers\StaffController::class, 'getTruckInventoryPage'])->name('staff.truckinventories');
     // Route::get('/suppliers/product', function(){
     //     return view('staff.suppliers.product');
     // });

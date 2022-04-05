@@ -48,23 +48,23 @@
             $('#addReceiptModal').modal('hide');
         })
 
-        // //add equipment Modal
-        // window.addEventListener('show-add-equipment-modal', event => {
-        //     $('#addEquipmentModal').modal('show');
-        // })
+        //add equipment Modal
+        window.addEventListener('show-edit-receipt-modal', event => {
+            $('#editReceiptModal').modal('show');
+        })
 
-        // window.addEventListener('hide-add-equipment-modal', event => {
-        //     $('#addEquipmentModal').modal('hide');
-        // })
+        window.addEventListener('hide-edit-receipt-modal', event => {
+            $('#editReceiptModal').modal('hide');
+        })
 
-        // //view stock Modal
-        // window.addEventListener('show-view-stock-modal', event => {
-        //     $('#viewStockModal').modal('show');
-        // })
+        //view stock Modal
+        window.addEventListener('show-edit-items-receipt-modal', event => {
+            $('#editItemsReceiptModal').modal('show');
+        })
 
-        // window.addEventListener('hide-view-stock-modal', event => {
-        //     $('#viewStockModal').modal('hide');
-        // })
+        window.addEventListener('hide-edit-items-receipt-modal', event => {
+            $('#editItemsReceiptModal').modal('hide');
+        })
 
         window.addEventListener('swal:modal', event => {
             swal({

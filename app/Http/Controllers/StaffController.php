@@ -102,4 +102,9 @@ class StaffController extends Controller
     {
         return view('staff.receipts.items');
     }
+
+    public function getTruckInventoryPage()
+    {
+        return view('staff.truckinventories.index');
+    }
 }
