@@ -3,43 +3,69 @@
 namespace App\Http\Livewire;
 
 use Livewire\Component;
+// use
 use App\Models\Customer;
-use Livewire\WithPagination;
+use App\Models\PhilippineCity;
+use App\Models\PhilippineProvince;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class StaffCustomer extends Component
 {
-    use WithPagination;
 
-    public $customer_name;
-    public $channel;
-    // public $salesman;
-    // public $date_entered;
-    public $contact_number;
-    public $address;
+    public $provinces;
+    public $selectedProvince = NULL;
+    public $sortByProvince = NULL;
+    public $sortByCity = NULL;
+    public $province;
+    public $cities;
+    public $city;
     public $email;
+    public $contact_number;
     public $is_active;
 
+    public $perPage = 5;
     public $searchTerm;
     public $updateMode = false;
-    public $customer_id;
-    public $deletecustomer_id = null;
 
-    protected $paginationTheme = 'bootstrap';
+    public function mount()
+    {
+        $this->provinces = PhilippineProvince::whereIn('id',['3','4',''])->get();
+    }
+
+    public function updatedSortByProvince($province_code)
+    {
+
+        $this->province = $province_code;
+        if (!is_null($province_code)) {
+            $this->cities = PhilippineCity::where('province_code','=', $province_code)->get();
+            // dd($this->customers);
+        }
+    }
+
+    public function updatedSelectedProvince($province_code)
+    {
+
+        $this->province = $province_code;
+        if (!is_null($province_code)) {
+            $this->cities = PhilippineCity::where('province_code','=', $province_code)->get();
+            // dd($this->customers);
+        }
+    }
 
     public function addNew()
     {
         $this->resetInputFields();
         $this->updateMode = false;
         $this->dispatchBrowserEvent('show-customer-modal');
+        $this->selectedProvince = $this->sortByProvince;
     }
 
     public function submit()
     {
         $validateData = $this->validate([
             'customer_name' => 'required',
-            'address' => 'required',
+            'selectedProvince' => 'required',
+            'city' => 'required',
             // 'contact_number' => 'required',
             // 'salesman' => 'required',
             'channel' => 'required',
@@ -48,7 +74,8 @@ class StaffCustomer extends Component
 
         Customer::create([
             'customer_name' => $this->customer_name,
-            'address' => $this->address,
+            'province_code' => $this->province,
+            'city_municipality_code' => $this->city,
             'contact_number' => $this->contact_number,
             'email' => $this->email,
             // 'salesman' => $this->salesman,
@@ -60,7 +87,13 @@ class StaffCustomer extends Component
 
         $this->dispatchBrowserEvent('hide-customer-modal');
 
-        session()->flash('message', 'New Customer Data Successfully Added!');
+
+        $this->dispatchBrowserEvent('swal:modal', [
+            'type' => 'success',
+            'message' => 'New Customer Data Successfully Added!',
+            'text' => 'Congrats.'
+        ]);
+        // session()->flash('message', 'New Customer Data Successfully Added!');
 
         return redirect()->back();
     }
@@ -72,14 +105,9 @@ class StaffCustomer extends Component
         // $this->salesman = '';
         // $this->date_entered = '';
         $this->email = '';
-        $this->address = '';
+        $this->selectedProvince = '';
+        $this->city = '';
         $this->is_active = '';
-    }
-
-    public function cancel()
-    {
-        $this->updateMode = false;
-        $this->resetInputFields();
     }
 
     public function edit($id)
@@ -89,7 +117,8 @@ class StaffCustomer extends Component
         $this->customer_id = $id;
         $this->customer_name = $customer->customer_name;
         $this->contact_number = $customer->contact_number;
-        $this->address = $customer->address;
+        $this->selectedProvince = $customer->province_code;
+        $this->city = $customer->city_municipality_code;
         $this->email = $customer->email;
         // $this->salesman = $customer->salesman;
         // $this->date_entered = $customer->date_entered;
@@ -102,7 +131,8 @@ class StaffCustomer extends Component
     {
         $validateData = $this->validate([
             'customer_name' => 'required',
-            'address' => 'required',
+            'city' => 'required',
+            'selectedProvince' => 'required',
             // 'contact_number' => 'required',
             // 'salesman' => 'required',
             'channel' => 'required',
@@ -112,7 +142,8 @@ class StaffCustomer extends Component
         $customer = Customer::find($this->customer_id);
         $customer->update([
             'customer_name' => $this->customer_name,
-            'address' => $this->address,
+            'province_code' => $this->province,
+            'city_municipality_code' => $this->city,
             'contact_number' => $this->contact_number,
             'email' => $this->email,
             // 'salesman' => $this->salesman,
@@ -125,37 +156,34 @@ class StaffCustomer extends Component
 
         $this->dispatchBrowserEvent('hide-customer-modal');
 
-        session()->flash('message', 'Costumer Data Updated Successfully.');
+        $this->dispatchBrowserEvent('swal:modal', [
+            'type' => 'success',
+            'message' => 'Customer Data Successfully Updated!',
+            'text' => 'Congrats.'
+        ]);
 
-        $this->resetInputFields();
-    }
-
-    public function confirmation($deleteid)
-    {
-        $this->deletecustomer_id = $deleteid;
-        $this->dispatchBrowserEvent('show-confirmation-delete-modal');
-
-    }
-
-    public function delete()
-    {
-        // dd('here');
-        Customer::destroy($this->deletecustomer_id);
-
-        $this->dispatchBrowserEvent('hide-confirmation-delete-modal');
-
-        session()->flash('message', 'Customer Data has been deleted.');
+        // session()->flash('message', 'Costumer Data Updated Successfully.');
 
         $this->resetInputFields();
     }
 
     public function render()
     {
-        $searchTerm = '%'.$this->searchTerm.'%';
+        $branch_id = Auth::user()->branch_id;
+
+
+        $customers = Customer::where('branch_id','=', $branch_id)
+                ->when($this->sortByProvince, function($query){
+                    $query->where('province_code', $this->sortByProvince);
+                    })
+                ->when($this->sortByCity, function($query){
+                    $query->where('city_municipality_code', $this->sortByCity);
+                    })
+                ->search(trim($this->searchTerm))
+                ->paginate($this->perPage);
+
         return view('livewire.staff-customer',[
-            'customers' => Customer::where('customer_name','like', $searchTerm)->latest()->paginate(5)
+            'customers' =>  $customers
         ]);
     }
-
-
 }

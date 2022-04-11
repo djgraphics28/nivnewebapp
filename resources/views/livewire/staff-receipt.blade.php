@@ -29,6 +29,7 @@
                                         <th>Description</th>
                                         {{-- <th width="500px">List of Products</th> --}}
                                         <th>Customer</th>
+                                        <th>Address</th>
                                         <th>Salesman</th>
                                         <th>Status</th>
                                         <th>Action</th>
@@ -79,8 +80,9 @@
                                             </table>
 
                                         </td> --}}
-                                        <td>{{ $data->customer->customer_name }}</td>
-                                        <td>{{ $data->employee->firstname }}</td>
+                                        <td>{{ $data->customer->customer_name ?? "" }}</td>
+                                        <td>{{ $data->customer->address ?? "" }}</td>
+                                        <td>{{ $data->employee->firstname ?? " "}}</td>
                                         <td>{{ $data->is_active == 1 ? "Active" : "Inactive" }}</td>
                                         <td>
                                             {{-- <a class="btn btn-success btn-sm" href="/staff/receipts/items/{{ $data->id }}"> <i class="fa fa-plus" aria-hidden="true"></i> Product</a> --}}
@@ -104,6 +106,7 @@
                                         <th>Description</th>
                                         {{-- <th>List of Products</th> --}}
                                         <th>Customer</th>
+                                        <th>Address</th>
                                         <th>Salesman</th>
                                         <th>Status</th>
                                         <th>Action</th>
@@ -173,14 +176,56 @@
                             @enderror
                         </div>
                     </div>
+                </div>
+                <div class="row">
+                    <div class="row">
+                        <div class="col-md-2">
+                         <label for="">Sort by Province</label>
+                         <select class="form-control" wire:model.prevent="sortByProvince">
+                              <option value="">All</option>
+                              @foreach ($provinces as $data)
+                                  <option value="{{ $data->province_code }}">{{ $data->province_description }}</option>
+                              @endforeach
+                          </select>
+                     </div>
+                     <div class="col-md-2">
+                         <label for="">Sort by City/Municipality</label>
+                          <select class="form-control" wire:model.prevent="sortByCity">
+                              <option value="">All</option>
+                              @if (!is_null($sortByProvince))
+                                 @foreach ($cities as $data)
+                                     <option value="{{ $data->city_municipality_code }}">{{ $data->city_municipality_description }}</option>
+                                 @endforeach
+                             @endif
+                          </select>
+                     </div>
+                    {{-- <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Filter Location</label>
+                            <select class="form-control @error('address') is-invalid @enderror" wire:model="selectedLocation">
+                                <option value="">--Choose--</option>
+                                @foreach ($location as $data)
+                                    <option value="{{ $data->address }}">{{ $data->address }}</option>
+                                @endforeach
+                            </select>
+                            @error('address')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div> --}}
+
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Customer</label>
-                            <select class="form-control @error('customer') is-invalid @enderror" wire:model.defer="customer">
+                            <select class="form-control @error('customer') is-invalid @enderror" wire:model="customer">
                                 <option value="">--Choose--</option>
-                                @foreach ($customers as $data)
-                                    <option value="{{ $data->id }}">{{ $data->customer_name }}</option>
-                                @endforeach
+                                @if (!is_null($selectedLocation))
+                                    @foreach ($customers as $data)
+                                        <option value="{{ $data->id }}">{{ $data->customer_name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                             @error('customer')
                                 <span class="invalid-feedback" role="alert">
@@ -439,7 +484,7 @@
                                 <td><p class="text-right">{{ $item->amount }}</p></td>
                                 <td>
                                     <button title="Edit Items" class="btn btn-warning btn-sm" wire:click.prevent="editReceiptProduct({{ $item->id }})"> <i class="fas fa-edit"></i></button>
-                                    <button title="Delete Items" class="btn btn-danger btn-sm" wire:click.prevent="alertConfirm({{ $item->id }})"> <i class="fas fa-trash"></i></button>
+                                    <button title="Delete Items" class="btn btn-danger btn-sm" wire:click.prevent="alertConfirm2({{ $item->id }})"> <i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         @empty

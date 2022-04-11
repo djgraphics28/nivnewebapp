@@ -14,9 +14,46 @@
                                {{ session('message') }}
                            </div>
                        @endif
-                           <div class="form-group">
-                               <input wire:model.prevent="searchTerm" type="text" class="col-md-6 form-control float-right mb-1" placeholder="Search here">
-                           </div>
+                    <div class="row">
+                       <div class="col-md-2">
+                        <label for="">Sort by Province</label>
+                        <select class="form-control" wire:model.prevent="sortByProvince">
+                             <option value="">All</option>
+                             @foreach ($provinces as $data)
+                                 <option value="{{ $data->province_code }}">{{ $data->province_description }}</option>
+                             @endforeach
+                         </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="">Sort by City/Municipality</label>
+                         <select class="form-control" wire:model.prevent="sortByCity">
+                             <option value="">All</option>
+                             @if (!is_null($sortByProvince))
+                                @foreach ($cities as $data)
+                                    <option value="{{ $data->city_municipality_code }}">{{ $data->city_municipality_description }}</option>
+                                @endforeach
+                            @endif
+                         </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="">Rows per Page</label>
+                            <select class="form-control" wire:model.prevent="perPage">
+                                <option value="">Per Page</option>
+                                <option value="5">5 per page</option>
+                                <option value="10">10 per page</option>
+                                <option value="15">15 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">Search Name</label>
+                        <input wire:model.prevent="searchTerm" type="text" class="form-control" placeholder="Search here">
+                    </div>
+                   </div>
+<hr>
                            <div class="table-responsive">
                                 <h6 class="card-title">Customer Datatables</h6>
                                     <table class="table table-bordered table-hover">
@@ -37,7 +74,7 @@
                                                 <tr>
                                                     <td>{{ $loop->iteration }}</td>
                                                     <td>{{ $data->customer_name }}</td>
-                                                    <td>{{ $data->address }}</td>
+                                                    <td>{{ $data->city->city_municipality_description ?? NULL }}, {{ $data->province->province_description ?? NULL }}</td>
                                                     <td>{{ $data->channel }}</td>
                                                     <td>{{ $data->contact_number }}</td>
                                                     <td>{{ $data->email }}</td>
@@ -120,8 +157,30 @@
                 </div>
 
                <div class="form-group">
-                    <label for="">Address</label>
-                    <input type="text" wire:model.defer="address" class="form-control @error('address') is-invalid @enderror" placeholder="Enter Address">
+                    <label for="">Province</label>
+                    <select type="text" wire:model="selectedProvince" class="form-control @error('selectedProvince') is-invalid @enderror">
+                        <option value="">--choose--</option>
+                        @foreach($provinces as $province)
+                            <option value="{{ $province->province_code }}">{{ $province->province_description }}</option>
+                        @endforeach
+                    </select>
+                    @error('address')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="">Municipality/City</label>
+                    <select type="text" wire:model="city" class="form-control @error('city') is-invalid @enderror">
+                        <option value="">--choose--</option>
+                        @if (!is_null($selectedProvince))
+                            @foreach($cities as $city)
+                                <option value="{{ $city->city_municipality_code }}">{{ $city->city_municipality_description }}</option>
+                            @endforeach
+                        @endif
+                    </select>
                     @error('address')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -176,26 +235,6 @@
        </form>
        </div>
    </div>
-
-   <!-- Confirmation Modal -->
-   <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true" wire:ignore.self>
-       <div class="modal-dialog" role="document">
-       <div class="modal-content">
-           <div class="modal-header">
-           <h5 class="modal-title" id="confirmationModalLabel">Delete Costumer</h5>
-           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-           </button>
-           </div>
-           <div class="modal-body">
-               <h3>Are you sure you want to delete this?</h3>
-               </div>
-               <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-               <button wire:click.prevent="delete()" type="button" class="btn btn-danger">Yes, Delete it.</button>
-           </div>
-       </div>
-       </div>
-   </div>
+    <!-- Form Modal -->
 
 </div>

@@ -8,7 +8,9 @@ use Livewire\Component;
 use App\Models\Customer;
 use App\Models\Employee;
 use Livewire\WithPagination;
+use App\Models\PhilippineCity;
 use App\Models\ReceiptProduct;
+use App\Models\PhilippineProvince;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -34,7 +36,7 @@ class StaffReceipt extends Component
     public $salesman;
     public $salesmans;
     public $customer;
-    public $customers;
+    public $customers = [];
     public $updateMode = false;
 
     public $products;
@@ -48,12 +50,42 @@ class StaffReceipt extends Component
     public $i = 1;
 
 
+    public $address;
+    // public $location = [];
     public $searchTerm;
     public $receiptItems = [];
+
+
+    public $provinces;
+    public $sortByProvince = NULL;
+    public $province;
+    public $cities;
+    public $city;
     // public $qty;
 
     protected $paginationTheme = 'bootstrap';
 
+    public $selectedLocation = NULL;
+
+    public function updatedSortByProvince($province_code)
+    {
+
+        $this->province = $province_code;
+        if (!is_null($province_code)) {
+            $this->cities = PhilippineCity::where('province_code','=', $province_code)->get();
+            // dd($this->customers);
+        }
+    }
+
+    // public function updatedSelectedProvince($province_code)
+    // {
+
+    //     $this->province = $province_code;
+    //     if (!is_null($province_code)) {
+    //         $this->cities = PhilippineCity::where('province_code','=', $province_code)->get();
+    //         // dd($this->customers);
+    //     }
+    // }
 
 
     public function add()
@@ -83,12 +115,27 @@ class StaffReceipt extends Component
     public function mount()
     {
         $this->salesmans = Employee::where('branch_id','=',Auth::user()->branch_id)->get();
-        $this->customers = Customer::where('branch_id','=',Auth::user()->branch_id)->orderBy('customer_name')->get();
+
         $this->products = Product::where('branch_id','=',Auth::user()->branch_id)->get();
 
+        $this->location = Customer::where('branch_id','=',Auth::user()->branch_id)->groupBy('address')->get();
+        // var_dump($this->location);
         // $this->allReceiptItems[] = [ 'product_id' => '', 'quantity' => 1, 'amount' => 0 ];
+        $this->customers = collect();
+
+        $this->provinces = PhilippineProvince::whereIn('id',['3','4'])->get();
 
 
+    }
+
+    public function updatedSelectedLocation($location)
+    {
+
+        // dd($location);
+        if (!is_null($location)) {
+            $this->customers = Customer::where('address','=', $location)->get();
+            // dd($this->customers);
+        }
     }
 
     public function addNew()
@@ -323,12 +370,37 @@ class StaffReceipt extends Component
             ]);
     }
 
+    public function alertConfirm2($id)
+    {
+        $this->deleteConfirmed = $id;
+        $this->dispatchBrowserEvent('swal:confirm', [
+                'type' => 'warning',
+                'message' => 'Are you sure?',
+                'text' => 'If deleted, you will not be able to recover this imaginary file!'
+            ]);
+    }
+
     /**
      * Write code on Method
      *
      * @return response()
      */
     public function remove()
+    {
+        /* Write Delete Logic */
+        $delete = Receipt::find($this->deleteConfirmed)->delete();
+        if($delete){
+            $this->dispatchBrowserEvent('swal:modal', [
+                'type' => 'success',
+                'message' => 'Items has been removed!',
+                'text' => 'It will not seen on list of receipts anymore.'
+            ]);
+        }
+        // $this->mount();
+
+    }
+
+    public function remove2()
     {
         /* Write Delete Logic */
         $delete = Receipt::find($this->deleteConfirmed)->delete();
@@ -345,6 +417,8 @@ class StaffReceipt extends Component
 
     public function render()
     {
+
+
         // $samples = Receipt::where('branch_id','=',Auth::user()->branch_id)->latest()->paginate(5);
         // // dd($receipts);
         // return view('livewire.staff-receipt',compact('samples'));

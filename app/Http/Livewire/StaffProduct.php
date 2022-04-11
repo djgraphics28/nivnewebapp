@@ -204,8 +204,8 @@ class StaffProduct extends Component
 
         $price = PriceTbl::where('product_id',$id)->latest()->first();
         // dd($price->price_per_case);
-        $this->price_per_case = $price->price_per_case;
-        $this->price_per_pcs = $price->price_per_pcs;
+        $this->price_per_case = $price->price_per_case ?? "";
+        $this->price_per_pcs = $price->price_per_pcs ?? "";
     }
 
     public function update()
@@ -228,6 +228,14 @@ class StaffProduct extends Component
             'category_id' => $this->category_id,
             'brand_id' => $this->brand_id,
             'stockalert' => $this->stockalert,
+        ]);
+
+        PriceTbl::create([
+            'product_id' => $product->id,
+            'price_per_case' => $this->price_per_case,
+            'price_per_pcs' => $this->price_per_pcs,
+            'date_priced' => now(),
+            'is_active' => 1,
         ]);
 
         $this->updateMode = false;

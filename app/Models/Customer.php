@@ -18,6 +18,8 @@ class Customer extends Model
         'is_active',
         'email',
         'branch_id',
+        'city_municipality_code',
+        'province_code',
     ];
 
     public function order()
@@ -28,5 +30,27 @@ class Customer extends Model
     public function receipt()
     {
         return $this->hasOne(Receipt::class, 'customer_id', 'id');
+    }
+
+    public function scopeSearch($query, $searchTerm)
+    {
+        $searchTerm = "%$searchTerm%";
+
+        $query->where(function($query) use ($searchTerm){
+
+            $query->where('customer_name','like', $searchTerm);
+        });
+
+
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(PhilippineCity::class, 'city_municipality_code', 'city_municipality_code');
+    }
+
+    public function province()
+    {
+        return $this->belongsTo(PhilippineProvince::class, 'province_code', 'province_code');
     }
 }
